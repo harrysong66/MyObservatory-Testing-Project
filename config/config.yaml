@@ -1,0 +1,146 @@
+# Project Configuration YAML
+# This file provides default configuration that can be overridden by environment variables
+
+appium:
+  # Server configuration
+  server:
+    local:
+      host: "127.0.0.1"
+      port: 4723
+      timeout: 60
+    docker:
+      host: "localhost"
+      port: 4723
+      timeout: 60
+  
+  # Common capabilities
+  common:
+    newCommandTimeout: 300
+    commandTimeout: 300
+    autoAcceptAlerts: true
+    autoGrantPermissions: true
+
+# Platform-specific configurations
+android:
+  platformName: "Android"
+  automationName: "UiAutomator2"
+  
+  # Device configuration
+  device:
+    emulator:
+      deviceName: "Android Emulator"
+      udid: "emulator-5554"
+      platformVersion: "13.0"
+    real:
+      deviceName: "Android Device"
+      udid: ""  # Set in environment variable
+      platformVersion: "13.0"
+  
+  # App configuration
+  app:
+    package: "hko.MyObservatory_v1_0"
+    activity: ".AgreementPage"
+    path: ""  # Set path to APK
+  
+  # Additional capabilities
+  capabilities:
+    noReset: false
+    fullReset: false
+    autoGrantPermissions: true
+    disableWindowAnimation: true
+    skipServerInstallation: true
+    skipDeviceInitialization: false
+    systemPort: 8200
+
+ios:
+  platformName: "iOS"
+  automationName: "XCUITest"
+  
+  # Device configuration
+  device:
+    simulator:
+      deviceName: "iPhone 14"
+      udid: "auto"
+      platformVersion: "16.0"
+    real:
+      deviceName: "iPhone"
+      udid: ""  # Set in environment variable
+      platformVersion: "16.0"
+  
+  # App configuration
+  app:
+    bundleId: "hk.gov.hko.MyObservatory"
+    path: ""  # Set path to .app or .ipa
+  
+  # Additional capabilities
+  capabilities:
+    noReset: false
+    fullReset: false
+    autoAcceptAlerts: true
+    useNewWDA: false
+    wdaLocalPort: 8100
+    showXcodeLog: true
+
+# API Configuration
+api:
+  base_url: "https://data.weather.gov.hk"
+  endpoints:
+    nine_day_forecast: "/weatherAPI/opendata/weather.php?dataType=fnd&lang=en"
+    current_weather: "/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en"
+    weather_warning: "/weatherAPI/opendata/weather.php?dataType=warnsum&lang=en"
+  
+  # Request configuration
+  timeout: 30
+  retry:
+    max_attempts: 3
+    delay: 1
+    backoff_factor: 2
+    status_forcelist: [500, 502, 503, 504]
+  
+  # Headers
+  headers:
+    User-Agent: "MyObservatory-Test-Framework/1.0"
+    Accept: "application/json"
+
+# Test Configuration
+test:
+  # Wait times (seconds)
+  waits:
+    implicit: 10
+    explicit: 20
+    polling: 0.5
+    page_load: 30
+  
+  # Screenshot configuration
+  screenshot:
+    enabled: true
+    on_failure: true
+    directory: "reports/screenshots"
+    format: "png"
+  
+  # Test data
+  data:
+    directory: "tests/testdata"
+  
+  # Parallel execution
+  parallel:
+    enabled: false
+    workers: 2
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  directory: "logs"
+  file: "test_execution.log"
+  console: true
+
+# Reporting Configuration
+reporting:
+  directory: "reports"
+  formats:
+    - html
+    - json
+  screenshots: true
+  video: false
