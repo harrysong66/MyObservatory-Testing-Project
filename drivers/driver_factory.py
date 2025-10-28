@@ -1,5 +1,3 @@
-"""Appium driver factory with dependency injection support."""
-
 from typing import Any, Optional
 
 from appium import webdriver
@@ -20,19 +18,6 @@ class AppiumDriverFactory:
         platform: Optional[str] = None,
         capabilities: Optional[dict] = None
     ) -> webdriver.Remote:
-        """Create Appium WebDriver instance.
-        
-        Args:
-            platform: Platform name (android/ios). Uses TEST_PLATFORM if not specified.
-            capabilities: Optional custom capabilities. Uses config if not specified.
-            
-        Returns:
-            Configured Appium WebDriver instance
-            
-        Raises:
-            ValueError: If platform is unsupported
-            Exception: If driver creation fails
-        """
         platform = (platform or config.test.platform).lower()
         appium_url = config.get_appium_url()
         
@@ -55,15 +40,6 @@ class AppiumDriverFactory:
         appium_url: str,
         capabilities: Optional[dict] = None
     ) -> webdriver.Remote:
-        """Create Android driver with fallback handling.
-        
-        Args:
-            appium_url: Appium server URL
-            capabilities: Optional custom capabilities
-            
-        Returns:
-            Android WebDriver instance
-        """
         caps = capabilities or config.get_capabilities("android")
         logger.debug(f"Android capabilities: {caps}")
         
@@ -116,15 +92,6 @@ class AppiumDriverFactory:
         appium_url: str,
         capabilities: Optional[dict] = None
     ) -> webdriver.Remote:
-        """Create iOS driver with fallback handling.
-        
-        Args:
-            appium_url: Appium server URL
-            capabilities: Optional custom capabilities
-            
-        Returns:
-            iOS WebDriver instance
-        """
         caps = capabilities or config.get_capabilities("ios")
         logger.debug(f"iOS capabilities: {caps}")
         
@@ -172,36 +139,18 @@ class AppiumDriverFactory:
 
     @staticmethod
     def quit_driver(driver: Optional[Any]) -> None:
-        """Safely quit driver with error handling.
-        
-        Args:
-            driver: WebDriver instance to quit
-        """
         if driver:
             try:
-                logger.info(f"Quitting {driver.platform} driver...")
+                logger.info(f"Quitting {config.test.platform} driver...")
                 driver.quit()
-                logger.info(f"{driver.platform} Driver quit successfully")
+                logger.info(f"{config.test.platform} Driver quit successfully")
             except Exception as e:
-                logger.error(f"Error quitting {driver.platform} driver: {e}")
+                logger.error(f"Error quitting {config.test.platform} driver: {e}")
 
 
 # Convenience function
 def create_driver(platform: Optional[str] = None) -> webdriver.Remote:
-    """Convenience function to create driver.
-    
-    Args:
-        platform: Platform name (android/ios)
-        
-    Returns:
-        Configured Appium WebDriver instance
-    """
     return AppiumDriverFactory.create_driver(platform)
 
 def quit_driver(driver: Optional[Any]) -> None:
-    """Convenience function to quit driver.
-
-    Args:
-        driver: WebDriver instance to quit
-    """
     AppiumDriverFactory.quit_driver(driver)

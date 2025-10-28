@@ -40,11 +40,6 @@ class WeatherAPIClient:
         logger.info(f"WeatherAPIClient initialized with base URL: {self.base_url}")
 
     def _create_session(self) -> requests.Session:
-        """Create requests session with retry configuration.
-        
-        Returns:
-            Configured requests Session
-        """
         session = requests.Session()
         
         # Configure retry strategy
@@ -76,19 +71,6 @@ class WeatherAPIClient:
         params: Optional[Dict[str, Any]] = None,
         timeout: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Make HTTP request with retry logic.
-        
-        Args:
-            endpoint: API endpoint path
-            params: Optional query parameters
-            timeout: Optional custom timeout
-            
-        Returns:
-            JSON response as dictionary
-            
-        Raises:
-            requests.RequestException: If request fails after retries
-        """
         url = f"{self.base_url}{endpoint}"
         timeout_value = timeout or self.timeout
         
@@ -119,11 +101,6 @@ class WeatherAPIClient:
             raise
 
     def get_nine_day_forecast(self) -> Optional[Dict[str, Any]]:
-        """Get 9-day weather forecast.
-        
-        Returns:
-            9-day forecast data or None if request fails
-        """
         logger.info("Fetching 9-day weather forecast")
         
         try:
@@ -146,11 +123,6 @@ class WeatherAPIClient:
             return None
 
     def get_current_weather(self) -> Optional[Dict[str, Any]]:
-        """Get current weather reading.
-        
-        Returns:
-            Current weather data or None if request fails
-        """
         logger.info("Fetching current weather")
         
         try:
@@ -171,11 +143,6 @@ class WeatherAPIClient:
             return None
 
     def get_weather_warning(self) -> Optional[Dict[str, Any]]:
-        """Get weather warning summary.
-        
-        Returns:
-            Weather warning data or None if request fails
-        """
         logger.info("Fetching weather warning")
         
         try:
@@ -200,15 +167,6 @@ class WeatherAPIClient:
         date: datetime,
         forecast_data: Optional[Dict[str, Any]] = None
     ) -> Optional[Dict[str, Any]]:
-        """Extract forecast data for specific date.
-        
-        Args:
-            date: Target date
-            forecast_data: Optional forecast data (fetches if not provided)
-            
-        Returns:
-            Forecast data for the date or None if not found
-        """
         logger.info(f"Extracting forecast for date: {date.strftime('%Y-%m-%d')}")
         
         # Fetch forecast data if not provided
@@ -250,15 +208,6 @@ class WeatherAPIClient:
         day_offset: int = 0,
         forecast_data: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
-        """Extract relative humidity for specific day offset from today.
-        
-        Args:
-            day_offset: Number of days from today (0=today, 1=tomorrow, 2=day after tomorrow)
-            forecast_data: Optional forecast data (fetches if not provided)
-            
-        Returns:
-            Humidity string (e.g., "60 - 85") or None if not found
-        """
         logger.info(f"Extracting humidity for day offset: {day_offset}")
         
         # Calculate target date
@@ -290,27 +239,10 @@ class WeatherAPIClient:
         self,
         forecast_data: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
-        """Extract relative humidity for the day after tomorrow.
-        
-        Args:
-            forecast_data: Optional forecast data (fetches if not provided)
-            
-        Returns:
-            Humidity string (e.g., "60 - 85") or None if not found
-        """
         logger.info("Extracting humidity for day after tomorrow")
         return self.extract_humidity_for_day_offset(day_offset=2, forecast_data=forecast_data)
 
     def parse_humidity_from_text(self, text: str) -> Optional[tuple]:
-        """Parse humidity range from text.
-        
-        Args:
-            text: Text containing humidity (e.g., "60 - 85%", "60-85")
-            
-        Returns:
-            Tuple of (min, max) or None if not found
-        """
-        # Pattern: 60-85, 60 - 85, 60%-85%
         pattern = r'(\d+)\s*%?\s*[-–]\s*(\d+)\s*%?'
         
         match = re.search(pattern, text)
@@ -328,16 +260,6 @@ class WeatherAPIClient:
         expected_min: Optional[int] = None,
         expected_max: Optional[int] = None
     ) -> bool:
-        """Validate humidity range against expected values.
-        
-        Args:
-            humidity_str: Humidity string to validate
-            expected_min: Expected minimum humidity (optional)
-            expected_max: Expected maximum humidity (optional)
-            
-        Returns:
-            True if valid, False otherwise
-        """
         humidity_range = self.parse_humidity_from_text(humidity_str)
         
         if not humidity_range:

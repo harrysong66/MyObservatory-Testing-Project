@@ -18,4 +18,4 @@ Feature: MyObservatory App Navigation
     When I tap on "Forecast & Warning Services"
     And I tap on "9-Day Forecast"
     Then I should see the "9-Day Forecast" page
-    And the page should display "9th" day's forecast information
+    And the page should display 9th day's forecast information

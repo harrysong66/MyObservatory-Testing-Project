@@ -11,13 +11,8 @@ logger = get_logger(__name__)
 
 
 class HomePage(BasePage):
-
     # Android locators
     ANDROID_LOCATORS = {
-        "wether_photo": (
-            AppiumBy.ID,
-            "hko.MyObservatory_v1_0:id/weatherPhoto"
-        ),
         "hamburger_menu_button": (
             AppiumBy.XPATH,
             '//android.widget.ImageButton[@content-desc="Navigate up"]'
@@ -26,10 +21,7 @@ class HomePage(BasePage):
 
     # iOS locators
     IOS_LOCATORS = {
-        "wether_photo": (
-            AppiumBy.ID,
-            "hko.MyObservatory_v1_0:id/weatherPhoto"
-        ),
+
         "hamburger_menu_button": (
             AppiumBy.XPATH,
             '//android.widget.ImageButton[@content-desc="Navigate up"]'
@@ -37,11 +29,6 @@ class HomePage(BasePage):
     }
 
     def __init__(self, driver):
-        """Initialize home page.
-        
-        Args:
-            driver: Appium WebDriver instance
-        """
         super().__init__(driver)
         self.platform = driver.capabilities.get("platformName", "Android").lower()
         self.locators = (
@@ -61,19 +48,11 @@ class HomePage(BasePage):
 
 
     def wait_for_home_page_load(self, timeout: int = 20) -> bool:
-        """Wait for home page to fully load.
-        
-        Args:
-            timeout: Maximum wait time
-            
-        Returns:
-            True if loaded, False otherwise
-        """
         logger.info("Waiting for home page to load...")
         
         try:
             # Wait for key elements to be present
-            self.find_element(self.locators["wether_photo"], timeout, raise_exception=True)
+            self.find_element(self.locators["hamburger_menu_button"], timeout, raise_exception=True)
             logger.info("Home page loaded successfully")
             return True
         except Exception as e:

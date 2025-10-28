@@ -14,9 +14,13 @@ class AgreementPage(BasePage):
             "hko.MyObservatory_v1_0:id/txt_content"
         ),
         "agree_button": (
-            AppiumBy.XPATH,
-            "//button[contains(text(),'Agree')]"
+            AppiumBy.ID,
+            "hko.MyObservatory_v1_0:id/btn_agree"
         ),
+        "confirm_btn": (
+            AppiumBy.ID,
+            "android:id/button1"
+        )
     }
 
     # iOS locators
@@ -51,6 +55,19 @@ class AgreementPage(BasePage):
             return True
 
         logger.error("Failed to click agree button")
+        return False
+
+    def click_confirm_btn(self, timeout: int = 15) -> bool:
+        logger.info("Attempting to click confirm button")
+        import time
+        time.sleep(5)  # Wait for potential animations to complete
+        logger.warning(self.driver.context)
+
+        if self.click(self.locators["confirm_btn"], timeout, wait_for_clickable=True):
+            logger.info("Clicked 'confirm button' successfully")
+            return True
+
+        logger.error("Failed to click confirm button")
         return False
 
 
