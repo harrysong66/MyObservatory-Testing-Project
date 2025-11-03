@@ -175,11 +175,9 @@ def nine_day_forecast_page(driver):
 def api_client():
     from api.weather_api_client import WeatherAPIClient
 
-    client = WeatherAPIClient()
-    logger.info("Weather API client created")
-
-    yield client
-
+    with WeatherAPIClient() as client:
+        logger.info("Weather API client created")
+        yield client
     logger.info("Weather API client cleanup complete")
 
 

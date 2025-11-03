@@ -45,6 +45,9 @@ class LoggerManager:
             )
             file_handler.setFormatter(file_formatter)
             logger.addHandler(file_handler)
+        
+        # Disable propagation to avoid duplicate logs
+        logger.propagate = False
 
         LoggerManager._loggers[name] = logger
         return logger

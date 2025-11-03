@@ -1,8 +1,14 @@
-"""Weather API client with retry logic and error handling."""
+"""Weather API client with retry logic and error handling.
+
+Supports both Open Data JSON and PDA fnd_e endpoints (which may return JSON
+despite the .xml suffix). Public methods return a normalized JSON structure
+with keys used by tests: generalSituation, updateTime, weatherForecast[].
+"""
 
 import re
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
+import json
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -82,7 +88,12 @@ class WeatherAPIClient:
             response.raise_for_status()
             
             logger.info(f"Request successful: {url}")
-            return response.json()
+            # Prefer response.json(); some endpoints may have wrong content-type
+            try:
+                return response.json()
+            except ValueError:
+                # Fallback: attempt to parse JSON from text
+                return json.loads(response.text)
             
         except requests.Timeout as e:
             logger.error(f"Request timeout: {url}")
@@ -100,6 +111,10 @@ class WeatherAPIClient:
             logger.error(f"Invalid JSON response: {url} - {e}")
             raise
 
+    # ------------------------------
+    # Normalization helpers (inlined usage)
+    # ------------------------------
+
     def get_nine_day_forecast(self) -> Optional[Dict[str, Any]]:
         logger.info("Fetching 9-day weather forecast")
         
@@ -107,59 +122,51 @@ class WeatherAPIClient:
             # Endpoint from YAML config
             endpoint = config.get_yaml_value(
                 "api", "endpoints", "nine_day_forecast",
-                default="/weatherAPI/opendata/weather.php?dataType=fnd&lang=en"
+                default="/locspc/android_data/fnd_e.xml"
             )
             
-            data = self._make_request(endpoint)
+            raw = self._make_request(endpoint)
+            # Normalize JSON to the structure expected by tests
+            general_situation = raw.get("generalSituation") or raw.get("general_situation")
+            update_time = (
+                raw.get("updateTime")
+                or raw.get("updatedatetime")
+                or raw.get("bulletin_datetime")
+            )
+
+            wf: List[Dict[str, Any]] = []
+            if isinstance(raw, dict):
+                if "weatherForecast" in raw:
+                    wf = raw.get("weatherForecast", []) or []
+                elif "forecast_detail" in raw:
+                    details: List[Dict[str, Any]] = raw.get("forecast_detail", []) or []
+                    for item in details:
+                        if not isinstance(item, dict):
+                            continue
+                        min_rh = item.get("min_rh")
+                        max_rh = item.get("max_rh")
+                        wf.append({
+                            "forecastDate": item.get("forecast_date"),
+                            "forecastMinrh": {"value": min_rh} if min_rh is not None else {},
+                            "forecastMaxrh": {"value": max_rh} if max_rh is not None else {},
+                        })
+
+            data = {
+                "generalSituation": general_situation,
+                "updateTime": update_time,
+                "weatherForecast": wf,
+            }
             
-            if data:
-                logger.info("9-day forecast retrieved successfully")
+            if data and data.get("weatherForecast"):
+                logger.info("9-day forecast retrieved and normalized successfully")
                 logger.debug(f"Forecast data keys: {list(data.keys())}")
+            else:
+                logger.warning("9-day forecast retrieved but empty or unrecognized shape")
             
             return data
             
         except Exception as e:
             logger.error(f"Failed to get 9-day forecast: {e}")
-            return None
-
-    def get_current_weather(self) -> Optional[Dict[str, Any]]:
-        logger.info("Fetching current weather")
-        
-        try:
-            endpoint = config.get_yaml_value(
-                "api", "endpoints", "current_weather",
-                default="/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en"
-            )
-            
-            data = self._make_request(endpoint)
-            
-            if data:
-                logger.info("Current weather retrieved successfully")
-            
-            return data
-            
-        except Exception as e:
-            logger.error(f"Failed to get current weather: {e}")
-            return None
-
-    def get_weather_warning(self) -> Optional[Dict[str, Any]]:
-        logger.info("Fetching weather warning")
-        
-        try:
-            endpoint = config.get_yaml_value(
-                "api", "endpoints", "weather_warning",
-                default="/weatherAPI/opendata/weather.php?dataType=warnsum&lang=en"
-            )
-            
-            data = self._make_request(endpoint)
-            
-            if data:
-                logger.info("Weather warning retrieved successfully")
-            
-            return data
-            
-        except Exception as e:
-            logger.error(f"Failed to get weather warning: {e}")
             return None
 
     def extract_forecast_for_date(

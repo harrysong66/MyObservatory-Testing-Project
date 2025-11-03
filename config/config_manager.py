@@ -86,7 +86,7 @@ class IOSConfig(BaseSettings):
 class APIConfig(BaseSettings):
     """API configuration."""
 
-    base_url: str = Field(default="https://data.weather.gov.hk", alias="API_BASE_URL")
+    base_url: str = Field(default="https://pda.weather.gov.hk", alias="API_BASE_URL")
     timeout: int = Field(default=30, alias="API_TIMEOUT")
     retry_count: int = Field(default=3, alias="API_RETRY_COUNT")
     retry_delay: int = Field(default=1, alias="API_RETRY_DELAY")

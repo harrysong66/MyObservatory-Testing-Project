@@ -3,7 +3,7 @@ name = "myobservatory-testing-project"
 version = "0.1.0"
 description = "Comprehensive testing framework for MyObservatory mobile app and API using Appium, pytest-bdd, and requests"
 authors = [
-    {name = "Hailei Song", email = "hailei.song@foxmail.com"}
+    { name = "Hailei Song", email = "hailei.song@foxmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = [
