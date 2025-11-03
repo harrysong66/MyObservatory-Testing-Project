@@ -25,14 +25,6 @@ class AgreementPage(BasePage):
 
     # iOS locators
     IOS_LOCATORS = {
-        "txt_content": (
-            AppiumBy.ID,
-            "hko.MyObservatory_v1_0:id/txt_content"
-        ),
-        "agree_button": (
-            AppiumBy.ID,
-            "hko.MyObservatory_v1_0:id/btn_agree"
-        ),
     }
 
     def __init__(self, driver):

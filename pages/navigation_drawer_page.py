@@ -42,14 +42,6 @@ class NavigationDrawerPage(BasePage):
 
     # iOS locators
     IOS_LOCATORS = {
-        "forecast_warning_services": (
-            AppiumBy.XPATH,
-            '//XCUIElementTypeStaticText[@name="Forecast & Warning Services"]'
-        ),
-        "nine_day_forecast": (
-            AppiumBy.XPATH,
-            '//XCUIElementTypeStaticText[@name="9-Day Forecast"]'
-        ),
     }
 
     def __init__(self, driver):

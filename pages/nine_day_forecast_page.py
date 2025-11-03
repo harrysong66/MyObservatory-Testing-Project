@@ -72,13 +72,7 @@ class NineDayForecastPage(BasePage):
         # Make sure we are on the correct tab to avoid landing on 'Extended Outlook'
         self.ensure_on_nine_day_tab(timeout=8)
         index = int(day)
-
-        # Prefer index-based selection within the ListView to avoid locale issues
-        target_instance = max(0, index - 1)  # instance is 0-based
-
-        list_view_locator = self.locators.get("list_view")
-        date_label_locator = self.locators.get("date_label")
-
+        
         def ascend_to_item(element) -> Optional[object]:
             try:
                 current = element
@@ -97,54 +91,7 @@ class NineDayForecastPage(BasePage):
             except Exception:
                 return element
             return element
-
-        # Accumulate visible date rows while vertically scrolling the ListView (no horizontal swipes)
-        try:
-            seen_keys: List[str] = []
-            seen_els: List[object] = []
-            lv = self.find_element(list_view_locator, timeout=5, raise_exception=False) if list_view_locator else None
-
-            # Quick pass on currently visible items (short timeout to avoid noisy logs)
-            dates = self.find_elements(date_label_locator, timeout=1) if date_label_locator else []
-            for d in dates:
-                key = f"{d.text}|{d.get_attribute('contentDescription')}"
-                if key not in seen_keys:
-                    seen_keys.append(key)
-                    seen_els.append(d)
-            if len(seen_els) > target_instance:
-                return ascend_to_item(seen_els[target_instance])
-
-            # Then scroll vertically within ListView and accumulate until we reach the target index
-            for attempt in range(12):
-                try:
-                    if lv is None:
-                        lv = self.find_element(list_view_locator, timeout=2, raise_exception=False)
-                    if lv is not None:
-                        rect = lv.rect
-                        start_x = int(rect["x"] + rect["width"] * 0.5)
-                        start_y = int(rect["y"] + rect["height"] * 0.8)
-                        end_y = int(rect["y"] + rect["height"] * 0.2)
-                        self.swipe(start_x, start_y, start_x, end_y, duration=450)
-                    else:
-                        size = self.driver.get_window_size()
-                        start_x = size["width"] // 2
-                        start_y = int(size["height"] * 0.8)
-                        end_y = int(size["height"] * 0.2)
-                        self.swipe(start_x, start_y, start_x, end_y, duration=550)
-                except Exception:
-                    pass
-
-                dates = self.find_elements(date_label_locator, timeout=1) if date_label_locator else []
-                for d in dates:
-                    key = f"{d.text}|{d.get_attribute('contentDescription')}"
-                    if key not in seen_keys:
-                        seen_keys.append(key)
-                        seen_els.append(d)
-                        if len(seen_els) > target_instance:
-                            return ascend_to_item(seen_els[target_instance])
-        except Exception:
-            pass
-
+        
         # As a last resort, try date-fragment search with vertical scroll
         target_dt = datetime.now() + timedelta(days=index)
         day_no_zero = str(target_dt.day)

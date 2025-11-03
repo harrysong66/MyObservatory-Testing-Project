@@ -38,10 +38,6 @@ class HomePage(BasePage):
 
     # iOS locators
     IOS_LOCATORS = {
-        "hamburger_menu_button": (
-            AppiumBy.XPATH,
-            '//android.widget.ImageButton[@content-desc="Navigate up"]'
-        ),
     }
 
     def __init__(self, driver):
